@@ -10,7 +10,6 @@ class BigInt
 private:
 	std::vector<char> v;
 	bool isNegative;
-
 	
 	void init(const std::string n)
 	{
@@ -20,29 +19,36 @@ private:
 			isNegative = (n[0] == '-') ? 1 : 0;
 			i = 1;
 		}
-		v.reserve(n.length() - i);
-		for (int j = n.length() - i - 1; j >= 0; --j)
+		v = std::vector<char>(n.rbegin(), n.rbegin() + (n.length() - i));
+		
+		for (auto& ch : v)
 		{
-			v[j] = n[j];
+			ch -= '0';
 		}
 	}
 
 	void normalize(BigInt& val)
 	{
-		size_t i = val.v.size();
-		while (i != 0 && v[i] == 0)
-			--i;
-
+		size_t i = val.v.size() - 1;
 		if (i != 0)
 		{
-			val.v.erase(v.begin() + i, v.end() - 1);
+			while (i != 0 && v[i] == 0)
+			{
+				--i;
+			}
+			val.v.erase(v.begin() + i, v.end());
+		}
+		else
+		{
+
+			v.push_back(0);
+			isNegative = false;
 		}
 	}
 
 public:
 	//Constructors
 	BigInt() : isNegative(false) {}
-	template <typename T>
 	BigInt(int n) { init(std::to_string(n)); normalize(*this); }
 	BigInt(long n) { init(std::to_string(n)); normalize(*this); }
 	BigInt(long long n) { init(std::to_string(n)); normalize(*this); }
@@ -57,7 +63,7 @@ public:
 		}
 
 		v.reserve(val.length());
-		for (int j = 0; j < val.length(); ++ j)
+		for (int j = 0; j < val.length() - i; ++ j)
 		{
 			v[j] = val[j + i];
 		}
@@ -114,7 +120,7 @@ public:
 	}
 	BigInt& operator-=(const BigInt& other)
 	{
-		if (isNegative != other.isNegative)
+		if (!isNegative && other.isNegative)
 		{
 			*this += other;
 			return *this;
